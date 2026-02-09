@@ -10,7 +10,7 @@
 2. [프로젝트 다운로드](#2-프로젝트-다운로드)
 3. [패키지 설치하기](#3-패키지-설치하기)
 4. [데이터베이스 설정](#4-데이터베이스-설정)
-5. [환경 설정 (API 키)](#5-환경-설정-api-키)
+5. [환경 설정 (Gemini API 키)](#5-환경-설정-gemini-api-키)
 6. [네이버 로그인](#6-네이버-로그인)
 7. [실행하기](#7-실행하기)
 8. [사용 방법](#8-사용-방법)
@@ -158,7 +158,7 @@ npx prisma db push
 
 ---
 
-## 5. 환경 설정 (API 키)
+## 5. 환경 설정 (Gemini API 키)
 
 가장 중요한 단계예요! 집중해주세요 👀
 
@@ -170,29 +170,22 @@ copy .env.example .env
 
 > Mac/Linux 사용자는: `cp .env.example .env`
 
-### 5-2. OpenAI API 키 발급받기
+### 5-2. Gemini API 키 발급받기
 
-GPT가 글을 써주려면 OpenAI API 키가 필요해요.
+블로그 리뷰 글을 자동으로 작성하기 위해 Google의 Gemini API 키가 필요해요.
 
 1. 브라우저에서 이 주소로 접속:
    ```
-   https://platform.openai.com/api-keys
+   https://aistudio.google.com/app/apikey
    ```
 
-2. 로그인하세요 (구글 계정으로 가능)
+2. 구글 계정으로 로그인하세요.
 
-3. 처음이라면 계정 설정을 해야 해요:
-   - 전화번호 인증
-   - 결제 수단 등록 (신용카드)
-   - **크레딧 충전** (최소 $5 정도 권장)
+3. **"Create API key"** 버튼을 클릭하세요.
 
-4. API Keys 페이지에서 **"Create new secret key"** 버튼 클릭
+4. **"Create API key in new project"** 버튼을 클릭하세요.
 
-5. 이름은 아무거나 입력 (예: "블로그자동화")
-
-6. **"Create secret key"** 클릭
-
-7. `sk-` 로 시작하는 긴 키가 나와요. **지금 바로 복사하세요!**
+5. 생성된 API 키(`AIza...` 형태)를 **지금 바로 복사하세요!**
 
 > ⚠️ **매우 중요!** 이 키는 한 번만 보여줘요. 창을 닫으면 다시 볼 수 없어요!
 > 반드시 메모장이나 안전한 곳에 저장해두세요.
@@ -218,8 +211,8 @@ GPT가 글을 써주려면 OpenAI API 키가 필요해요.
 4. 파일 내용을 아래처럼 수정해요:
 
 ```
-# OpenAI API 키 (필수)
-OPENAI_API_KEY=sk-여기에아까복사한키붙여넣기
+# Gemini API 키 (필수)
+GEMINI_API_KEY=여기에아까복사한키붙여넣기
 
 # 네이버 블로그 ID (필수)
 NAVER_BLOG_ID=내블로그아이디
@@ -230,7 +223,7 @@ DATABASE_URL="file:./prisma/dev.db"
 
 **예시:**
 ```
-OPENAI_API_KEY=sk-proj-ABC123abc123ABC123abc123ABC123abc123
+GEMINI_API_KEY=AIzaSyA1B2C3D4E5F6G7H8I9J0
 NAVER_BLOG_ID=happyblogger123
 DATABASE_URL="file:./prisma/dev.db"
 ```
@@ -339,7 +332,7 @@ npm run dev
 
 3. 브라우저가 자동으로 열리고 작업이 시작돼요:
    - 상품 페이지 접속 & 이미지 수집
-   - GPT가 리뷰 글 작성
+   - Gemini가 리뷰 글 작성
    - 블로그 에디터 열기
    - 제목 입력
    - 이미지 업로드

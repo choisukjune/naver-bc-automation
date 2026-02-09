@@ -2,7 +2,10 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
-    "lib": ["ES2020"],
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,10 +15,16 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
-  "include": ["scripts/**/*", "src/lib/**/*"],
-  "exclude": ["node_modules"]
+  "include": [
+    "scripts/**/*",
+    "src/lib/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
-

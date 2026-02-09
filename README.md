@@ -5,7 +5,7 @@
 ## ✨ 주요 기능
 
 - 🔗 **상품 URL만 입력하면 끝!** - 브랜드커넥트 링크만 넣으면 자동으로 처리
-- 🤖 **GPT 기반 글 작성** - SEO 최적화된 자연스러운 리뷰 글 자동 생성
+- 🤖 **Gemini 기반 글 작성** - SEO 최적화된 자연스러운 리뷰 글 자동 생성
 - 🖼️ **이미지 자동 스크래핑** - 상품 이미지 자동 수집 및 업로드
 - 📝 **해시태그 자동 생성** - 검색 노출을 위한 해시태그 자동 추가
 - 🌐 **웹 대시보드** - 편리한 웹 UI로 링크 관리 및 발행
@@ -26,13 +26,11 @@ node --version
 # v18.x.x 이상이 나오면 성공!
 ```
 
-### 2. OpenAI API 키 발급
-
-1. [OpenAI Platform](https://platform.openai.com/api-keys) 접속
-2. 구글/마이크로소프트 계정으로 로그인 (또는 회원가입)
-3. 좌측 메뉴에서 **API Keys** 클릭
-4. **"Create new secret key"** 버튼 클릭
-5. 생성된 키 복사 (sk-xxx... 형태)
+### 2. Gemini API 키 발급
+1. [Google AI Studio](https://aistudio.google.com/app/apikey) 접속
+2. 구글 계정으로 로그인 (또는 회원가입)
+3. **"Create API key"** 버튼 클릭
+4. 생성된 키 복사 (`AIza...` 형태)
 
 > ⚠️ API 키는 한 번만 보여주므로 반드시 복사해서 안전한 곳에 저장하세요!
 
@@ -96,8 +94,8 @@ cp .env.example .env
 메모장 또는 VS Code로 `.env` 파일을 열고 아래 내용을 입력:
 
 ```env
-# OpenAI API 키 (위에서 발급받은 키)
-OPENAI_API_KEY=sk-여기에_발급받은_키_붙여넣기
+# Gemini API 키 (위에서 발급받은 키)
+GEMINI_API_KEY=여기에_발급받은_키_붙여넣기
 
 # 네이버 블로그 ID
 NAVER_BLOG_ID=내_블로그_아이디
@@ -140,7 +138,7 @@ npm run dev
 발행 버튼을 누르면:
 - 브라우저가 자동으로 열림
 - 상품 이미지 스크래핑
-- GPT가 리뷰 글 작성
+- Gemini가 리뷰 글 작성
 - 이미지 업로드 + 글 작성
 - 자동 발행 완료!
 

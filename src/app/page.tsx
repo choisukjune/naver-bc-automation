@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import SessionStatus from "@/components/SessionStatus";
 
 interface BrandLink {
@@ -16,6 +16,8 @@ interface BrandLink {
   errorMessage: string | null;
   memo: string | null;
   createdAt: string;
+  thumbnailPrompts: string | null;
+  thumbnailTitles: string | null;
 }
 
 export default function Dashboard() {
@@ -25,6 +27,13 @@ export default function Dashboard() {
   const [newMemo, setNewMemo] = useState("");
   const [adding, setAdding] = useState(false);
   const [publishingId, setPublishingId] = useState<string | null>(null);
+  const [expandedLinks, setExpandedLinks] = useState<string[]>([]);
+
+  const toggleExpand = (id: string) => {
+    setExpandedLinks(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   const fetchLinks = useCallback(async () => {
     try {
@@ -113,12 +122,12 @@ export default function Dashboard() {
         const pollStatus = setInterval(async () => {
           const statusRes = await fetch(`/api/brandlinks/${id}`);
           const statusData = await statusRes.json();
-          
+
           if (statusData.data.status !== "PUBLISHING") {
             clearInterval(pollStatus);
             fetchLinks();
             setPublishingId(null);
-            
+
             if (statusData.data.status === "PUBLISHED") {
               alert("✅ 발행 완료!");
             } else if (statusData.data.status === "FAILED") {
@@ -242,14 +251,14 @@ export default function Dashboard() {
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="https://naver.me/xxx 또는 브랜드커넥트 URL"
-              className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
             />
             <input
               type="text"
               value={newMemo}
               onChange={(e) => setNewMemo(e.target.value)}
               placeholder="메모 (선택)"
-              className="w-48 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-48 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
             />
             <button
               onClick={handleAddLink}
@@ -288,108 +297,188 @@ export default function Dashboard() {
                 </tr>
               ) : (
                 links.map((link) => (
-                  <tr key={link.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        {/* 이미지 썸네일 */}
-                        {link.imageUrls && JSON.parse(link.imageUrls)[0] && (
-                          <img
-                            src={JSON.parse(link.imageUrls)[0]}
-                            alt=""
-                            className="w-12 h-12 object-cover rounded-lg"
-                          />
-                        )}
-                        <div>
-                          <div className="font-medium text-slate-800">
-                            {link.productName || "(상품 정보 없음)"}
-                          </div>
-                          {link.productPrice && (
-                            <div className="text-sm text-slate-500">{link.productPrice}</div>
+                  <React.Fragment key={link.id}>
+                    <tr className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {/* 이미지 썸네일 */}
+                          {link.imageUrls && JSON.parse(link.imageUrls)[0] && (
+                            <img
+                              src={JSON.parse(link.imageUrls)[0]}
+                              alt=""
+                              className="w-12 h-12 object-cover rounded-lg border border-slate-200"
+                            />
                           )}
+                          <div>
+                            <div className="font-medium text-slate-800">
+                              {link.productName || "(상품 정보 없음)"}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {link.productPrice && (
+                                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                  {link.productPrice}
+                                </span>
+                              )}
+                              {link.storeName && (
+                                <span className="text-xs text-slate-400">@ {link.storeName}</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm"
-                      >
-                        {link.url.length > 40 ? link.url.substring(0, 40) + "..." : link.url}
-                      </a>
-                      {link.postUrl && (
-                        <div className="mt-1">
-                          <a
-                            href={link.postUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-green-600 hover:underline text-xs"
-                          >
-                            📄 발행된 글 보기
-                          </a>
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(link.status)}`}>
-                        {getStatusText(link.status)}
-                      </span>
-                      {link.errorMessage && (
-                        <div className="text-xs text-red-500 mt-1" title={link.errorMessage}>
-                          ⚠️
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-slate-500">
-                      {link.memo || "-"}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        {/* 상품 정보 가져오기 */}
-                        {!link.productName && (
-                          <button
-                            onClick={() => handleScrape(link.id)}
-                            className="px-3 py-1 text-sm bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors"
-                            title="상품 정보 가져오기"
-                          >
-                            🔍
-                          </button>
-                        )}
-                        
-                        {/* 발행하기 버튼 */}
-                        {link.status === "READY" && (
-                          <button
-                            onClick={() => handlePublish(link.id)}
-                            disabled={publishingId === link.id}
-                            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
-                          >
-                            {publishingId === link.id ? "⏳" : "🚀 발행"}
-                          </button>
-                        )}
-                        
-                        {/* 재발행 */}
-                        {link.status === "FAILED" && (
-                          <button
-                            onClick={() => handlePublish(link.id)}
-                            disabled={publishingId === link.id}
-                            className="px-3 py-1 text-sm bg-amber-500 text-white rounded hover:bg-amber-600 disabled:opacity-50 transition-colors"
-                          >
-                            🔄 재시도
-                          </button>
-                        )}
-                        
-                        {/* 삭제 */}
-                        <button
-                          onClick={() => handleDeleteLink(link.id)}
-                          className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                          title="삭제"
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline inline-block max-w-[150px] truncate"
                         >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                          {link.url}
+                        </a>
+                        {link.postUrl && (
+                          <div className="mt-1">
+                            <a
+                              href={link.postUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-600 hover:underline text-xs flex items-center gap-1"
+                            >
+                              📄 발행 글
+                            </a>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusColor(link.status)}`}>
+                          {getStatusText(link.status)}
+                        </span>
+                        {link.errorMessage && (
+                          <div className="text-xs text-red-500 mt-1" title={link.errorMessage}>
+                            ⚠️
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm text-slate-500">
+                        {link.memo || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          {/* 썸네일 기획 아이콘 (프롬프트가 있거나 타이틀이 있는 경우 노출) */}
+                          {(link.status === "PUBLISHED" || link.thumbnailPrompts || link.thumbnailTitles) && (
+                            <button
+                              onClick={() => toggleExpand(link.id)}
+                              className={`p-1.5 rounded-lg transition-colors ${expandedLinks.includes(link.id) ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                              title="썸네일 기획 보기"
+                            >
+                              📸
+                            </button>
+                          )}
+
+                          {/* 상품 정보 가져오기 */}
+                          {!link.productName && (
+                            <button
+                              onClick={() => handleScrape(link.id)}
+                              className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors"
+                              title="상품 정보 가져오기"
+                            >
+                              🔍
+                            </button>
+                          )}
+
+                          {/* 발행하기 버튼 */}
+                          {link.status === "READY" && (
+                            <button
+                              onClick={() => handlePublish(link.id)}
+                              disabled={publishingId === link.id}
+                              className="px-3 py-1.5 text-xs font-bold bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-colors shadow-sm"
+                            >
+                              {publishingId === link.id ? "⏳" : "🚀 발행"}
+                            </button>
+                          )}
+
+                          {/* 재발행 */}
+                          {link.status === "FAILED" && (
+                            <button
+                              onClick={() => handlePublish(link.id)}
+                              disabled={publishingId === link.id}
+                              className="px-3 py-1.5 text-xs font-bold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
+                            >
+                              🔄 재시도
+                            </button>
+                          )}
+
+                          {/* 삭제 */}
+                          <button
+                            onClick={() => handleDeleteLink(link.id)}
+                            className="p-1.5 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                            title="삭제"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* 확장 섹션: 썸네일 기획 정보 */}
+                    {expandedLinks.includes(link.id) && (
+                      <tr>
+                        <td colSpan={5} className="bg-slate-50/50 px-6 py-6 border-b border-slate-200">
+                          <div className="flex gap-8">
+                            {/* 좌측: 프롬프트 */}
+                            <div className="flex-1 space-y-4">
+                              <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                🎨 나노 바나나프로 합성 프롬프트
+                              </h4>
+                              {link.thumbnailPrompts && JSON.parse(link.thumbnailPrompts).map((p: string, idx: number) => (
+                                <div key={idx} className="bg-white border border-slate-200 rounded-lg p-3 text-xs text-slate-600 relative group">
+                                  <span className="absolute -left-2 -top-2 bg-slate-800 text-white w-5 h-5 flex items-center justify-center rounded-full scale-75 font-bold">
+                                    {idx + 1}
+                                  </span>
+                                  {p}
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(p);
+                                      alert("프롬프트가 복사되었습니다.");
+                                    }}
+                                    className="ml-2 text-blue-500 hover:text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    [복사]
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* 우측: 타이틀 디자인 */}
+                            <div className="flex-1 space-y-4">
+                              <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                🏷️ 썸네일 타이틀 추천
+                              </h4>
+                              <div className="grid gap-3">
+                                {link.thumbnailTitles && JSON.parse(link.thumbnailTitles).map((t: { main: string, sub: string }, idx: number) => (
+                                  <div key={idx} className="bg-white border border-slate-200 rounded-lg p-3 space-y-1 relative group">
+                                    <span className="absolute -left-2 -top-2 bg-amber-500 text-white w-5 h-5 flex items-center justify-center rounded-full scale-75 font-bold">
+                                      {idx + 1}
+                                    </span>
+                                    <div className="text-sm font-bold text-slate-800">{t.main}</div>
+                                    <div className="text-[10px] text-slate-500">{t.sub}</div>
+                                    <button
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(`${t.main}\n${t.sub}`);
+                                        alert("타이틀이 복사되었습니다.");
+                                      }}
+                                      className="absolute right-2 top-2 text-[10px] text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      복사
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))
               )}
             </tbody>
